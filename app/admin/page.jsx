@@ -20,24 +20,31 @@ export default function AdminPanel() {
     mobile: "",
     address: "",
     gstNo: "",
-    currentReading: 0
+    currentReading: 0,
   });
 
   const [invoiceData, setInvoiceData] = useState({
     invoiceNo: "",
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
     previousReading: 0,
     rentAmount: 0,
     freeCopies: 0,
     ratePerReading: 0,
     isRent: false,
-    gstType: "cgst" // cgst or igst
+    gstType: "cgst", // cgst or igst
   });
 
   const [netPayableReading, setNetPayableReading] = useState(0);
   const [totalBeforeTax, setTotalBeforeTax] = useState(0);
   const [totalAfterTax, setTotalAfterTax] = useState(0);
   const [gstAmount, setGstAmount] = useState(0);
+
+  // Function to generate random invoice number
+  const generateInvoiceNumber = () => {
+    const prefix = "INV";
+    const randomNum = Math.floor(Math.random() * 90000) + 10000; // Generates a 5-digit random number
+    return `${prefix}-${randomNum}`;
+  };
 
   useEffect(() => {
     // Check authentication status
@@ -46,6 +53,12 @@ export default function AdminPanel() {
     if (!isAuthenticated) {
       router.push("/login");
     } else {
+      // Generate invoice number when component mounts
+      setInvoiceData((prev) => ({
+        ...prev,
+        invoiceNo: generateInvoiceNumber(),
+      }));
+
       setTimeout(() => {
         setIsLoading(false);
         initAnimations();
@@ -102,31 +115,35 @@ export default function AdminPanel() {
 
   const handleCustomerChange = (e) => {
     const { name, value } = e.target;
-    setCustomerData(prev => ({
+    setCustomerData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleInvoiceChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setInvoiceData(prev => ({
+    setInvoiceData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const calculateInvoice = () => {
     // Calculate net payable reading
-    const netReading = invoiceData.isRent 
-      ? customerData.currentReading - invoiceData.previousReading - invoiceData.freeCopies
+    const netReading = invoiceData.isRent
+      ? customerData.currentReading -
+        invoiceData.previousReading -
+        invoiceData.freeCopies
       : customerData.currentReading - invoiceData.previousReading;
-    
+
     setNetPayableReading(netReading > 0 ? netReading : 0);
 
     // Calculate total before tax
     const readingCost = netPayableReading * invoiceData.ratePerReading;
-    const total = invoiceData.isRent ? readingCost + Number(invoiceData.rentAmount) : readingCost;
+    const total = invoiceData.isRent
+      ? readingCost + Number(invoiceData.rentAmount)
+      : readingCost;
     setTotalBeforeTax(total);
 
     // Calculate GST
@@ -203,7 +220,7 @@ export default function AdminPanel() {
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            Invoice Management System
+            Admin Panel - Invoice Management System
           </h1>
           <div className="flex items-center gap-4">
             <button
@@ -238,19 +255,31 @@ export default function AdminPanel() {
         {/* Navigation Tabs */}
         <div className="flex border-b border-gray-700 mb-6">
           <button
-            className={`px-4 py-2 font-medium ${activeTab === "customer" ? "text-blue-400 border-b-2 border-blue-400" : "text-gray-400"}`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "customer"
+                ? "text-blue-400 border-b-2 border-blue-400"
+                : "text-gray-400"
+            }`}
             onClick={() => setActiveTab("customer")}
           >
             Customer Details
           </button>
           <button
-            className={`px-4 py-2 font-medium ${activeTab === "invoice" ? "text-blue-400 border-b-2 border-blue-400" : "text-gray-400"}`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "invoice"
+                ? "text-blue-400 border-b-2 border-blue-400"
+                : "text-gray-400"
+            }`}
             onClick={() => setActiveTab("invoice")}
           >
             Invoice Creation
           </button>
           <button
-            className={`px-4 py-2 font-medium ${activeTab === "preview" ? "text-blue-400 border-b-2 border-blue-400" : "text-gray-400"}`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "preview"
+                ? "text-blue-400 border-b-2 border-blue-400"
+                : "text-gray-400"
+            }`}
             onClick={() => setActiveTab("preview")}
           >
             Invoice Preview
@@ -263,10 +292,14 @@ export default function AdminPanel() {
             ref={(el) => (cardRefs.current[0] = el)}
             className="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-700/50 shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
           >
-            <h2 className="text-xl font-semibold text-blue-400 mb-4">Customer Information</h2>
+            <h2 className="text-xl font-semibold text-blue-400 mb-4">
+              Customer Information
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-400 mb-1">Customer Name</label>
+                <label className="block text-gray-400 mb-1">
+                  Customer Name
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -276,7 +309,9 @@ export default function AdminPanel() {
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-1">Mobile Number</label>
+                <label className="block text-gray-400 mb-1">
+                  Mobile Number
+                </label>
                 <input
                   type="text"
                   name="mobile"
@@ -306,7 +341,9 @@ export default function AdminPanel() {
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-1">Current Reading</label>
+                <label className="block text-gray-400 mb-1">
+                  Current Reading
+                </label>
                 <input
                   type="number"
                   name="currentReading"
@@ -325,17 +362,35 @@ export default function AdminPanel() {
             ref={(el) => (cardRefs.current[1] = el)}
             className="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-700/50 shadow-lg hover:shadow-emerald-500/10 transition-all duration-300"
           >
-            <h2 className="text-xl font-semibold text-emerald-400 mb-4">Invoice Details</h2>
+            <h2 className="text-xl font-semibold text-emerald-400 mb-4">
+              Invoice Details
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-400 mb-1">Invoice Number</label>
-                <input
-                  type="text"
-                  name="invoiceNo"
-                  value={invoiceData.invoiceNo}
-                  onChange={handleInvoiceChange}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+                <label className="block text-gray-400 mb-1">
+                  Invoice Number
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    name="invoiceNo"
+                    value={invoiceData.invoiceNo}
+                    readOnly
+                    className="w-full bg-gray-700/50 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setInvoiceData((prev) => ({
+                        ...prev,
+                        invoiceNo: generateInvoiceNumber(),
+                      }))
+                    }
+                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors"
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-gray-400 mb-1">Date</label>
@@ -348,7 +403,9 @@ export default function AdminPanel() {
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-1">Previous Reading</label>
+                <label className="block text-gray-400 mb-1">
+                  Previous Reading
+                </label>
                 <input
                   type="number"
                   name="previousReading"
@@ -358,7 +415,9 @@ export default function AdminPanel() {
                 />
               </div>
               <div>
-                <label className="block text-gray-400 mb-1">Rate Per Reading</label>
+                <label className="block text-gray-400 mb-1">
+                  Rate Per Reading
+                </label>
                 <input
                   type="number"
                   name="ratePerReading"
@@ -380,7 +439,9 @@ export default function AdminPanel() {
               {invoiceData.isRent && (
                 <>
                   <div>
-                    <label className="block text-gray-400 mb-1">Rent Amount</label>
+                    <label className="block text-gray-400 mb-1">
+                      Rent Amount
+                    </label>
                     <input
                       type="number"
                       name="rentAmount"
@@ -390,7 +451,9 @@ export default function AdminPanel() {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-400 mb-1">Free Copies Count</label>
+                    <label className="block text-gray-400 mb-1">
+                      Free Copies Count
+                    </label>
                     <input
                       type="number"
                       name="freeCopies"
@@ -417,23 +480,36 @@ export default function AdminPanel() {
 
             {/* Calculation Summary */}
             <div className="mt-6 bg-gray-700/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-blue-400 mb-2">Calculation Summary</h3>
+              <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                Calculation Summary
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-gray-400">Net Payable Reading:</p>
-                  <p className="text-xl font-bold text-white">{netPayableReading}</p>
+                  <p className="text-xl font-bold text-white">
+                    {netPayableReading}
+                  </p>
                 </div>
                 <div>
                   <p className="text-gray-400">Total Before Tax:</p>
-                  <p className="text-xl font-bold text-white">₹{totalBeforeTax.toFixed(2)}</p>
+                  <p className="text-xl font-bold text-white">
+                    ₹{totalBeforeTax.toFixed(2)}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-400">GST Amount ({invoiceData.gstType === "cgst" ? "CGST+SGST" : "IGST"}):</p>
-                  <p className="text-xl font-bold text-white">₹{gstAmount.toFixed(2)}</p>
+                  <p className="text-gray-400">
+                    GST Amount (
+                    {invoiceData.gstType === "cgst" ? "CGST+SGST" : "IGST"}):
+                  </p>
+                  <p className="text-xl font-bold text-white">
+                    ₹{gstAmount.toFixed(2)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-gray-400">Total After Tax:</p>
-                  <p className="text-xl font-bold text-white">₹{totalAfterTax.toFixed(2)}</p>
+                  <p className="text-xl font-bold text-white">
+                    ₹{totalAfterTax.toFixed(2)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -446,7 +522,9 @@ export default function AdminPanel() {
             ref={(el) => (cardRefs.current[2] = el)}
             className="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-700/50 shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
           >
-            <h2 className="text-xl font-semibold text-purple-400 mb-4">Invoice Preview</h2>
+            <h2 className="text-xl font-semibold text-purple-400 mb-4">
+              Invoice Preview
+            </h2>
             <div className="bg-white text-gray-800 p-6 rounded-lg">
               <div className="flex justify-between items-center mb-6">
                 <div>
@@ -457,7 +535,7 @@ export default function AdminPanel() {
                   <p className="text-gray-600">Date: {invoiceData.date}</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
                   <h3 className="font-bold text-lg mb-2">Bill To:</h3>
@@ -480,7 +558,7 @@ export default function AdminPanel() {
                   </div>
                 </div>
               </div>
-              
+
               <table className="w-full mb-6">
                 <thead>
                   <tr className="border-b-2 border-gray-200">
@@ -492,28 +570,47 @@ export default function AdminPanel() {
                   {invoiceData.isRent && (
                     <tr className="border-b border-gray-100">
                       <td className="py-2">Rent Amount</td>
-                      <td className="text-right py-2">{invoiceData.rentAmount}</td>
+                      <td className="text-right py-2">
+                        {invoiceData.rentAmount}
+                      </td>
                     </tr>
                   )}
                   <tr className="border-b border-gray-100">
-                    <td className="py-2">Reading Charges ({netPayableReading} x {invoiceData.ratePerReading})</td>
-                    <td className="text-right py-2">{(netPayableReading * invoiceData.ratePerReading).toFixed(2)}</td>
+                    <td className="py-2">
+                      Reading Charges ({netPayableReading} x{" "}
+                      {invoiceData.ratePerReading})
+                    </td>
+                    <td className="text-right py-2">
+                      {(netPayableReading * invoiceData.ratePerReading).toFixed(
+                        2
+                      )}
+                    </td>
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="py-2">Subtotal</td>
-                    <td className="text-right py-2">{totalBeforeTax.toFixed(2)}</td>
+                    <td className="text-right py-2">
+                      {totalBeforeTax.toFixed(2)}
+                    </td>
                   </tr>
                   <tr className="border-b border-gray-100">
-                    <td className="py-2">GST ({invoiceData.gstType === "cgst" ? "CGST 9% + SGST 9%" : "IGST 18%"})</td>
+                    <td className="py-2">
+                      GST (
+                      {invoiceData.gstType === "cgst"
+                        ? "CGST 9% + SGST 9%"
+                        : "IGST 18%"}
+                      )
+                    </td>
                     <td className="text-right py-2">{gstAmount.toFixed(2)}</td>
                   </tr>
                   <tr className="border-b-2 border-gray-200 font-bold">
                     <td className="py-2">Total Amount</td>
-                    <td className="text-right py-2">{totalAfterTax.toFixed(2)}</td>
+                    <td className="text-right py-2">
+                      {totalAfterTax.toFixed(2)}
+                    </td>
                   </tr>
                 </tbody>
               </table>
-              
+
               <div className="text-center mt-8 pt-4 border-t border-gray-200">
                 <p>Thank you for your business!</p>
               </div>
